@@ -1,36 +1,100 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Re:novate Project
 
-## Getting Started
+![Re-novate 첫 화면](./images/re-novate-home-screen.png)
+Re:novate의 배포된 버전은 다음 링크에서 확인할 수 있습니다.  [https://re-novate.kro.kr](https://re-novate.kro.kr)
 
-First, run the development server:
+
+
+## 프로젝트 개요
+
+✨Re:novate는 AI와 사용자 간의 상호작용을 통해 보고서 작성 프로세스를 혁신🚀하는 것을 목표로 합니다.
+
+-  **AI 협업 보고서 생성**: 사용자 입력과 AI 제안을 결합하여 고품질 보고서 작성
+-  **실시간 편집 및 개선**: AI의 실시간 피드백을 통한 보고서 품질 향상
+-  **다양한 데이터 소스 통합**: 웹검색(뉴스, 블로그, 웹 문서) 등 다양한 출처의 정보를 활용
+
+이 프로젝트는 생성형 AI의 활용 방식에 혁신적인 변화를 가져오고, 사용자들의 AI 이용 행태를 개선하는 것을 궁극적인 목표로 합니다.
+
+### 기술 스택
+
+- Frontend: Next.js 14
+- Styling: Tailwind CSS
+- State Management: Recoil
+- API: RESTful API with Axios
+- AI Integration:   
+    ✨Upstage solar, document-parse  
+    OpenAI GPT-4, DALL-E
+
+## 설치 및 실행 방법
+
+### 요구사항
+
+- Node.js (v14.0.0 이상)
+- npm (v6.0.0 이상) 또는 yarn (v1.22.0 이상)
+
+### 설치 단계
+
+1. 리포지토리 클론:
+   ```bash
+   git clone https://github.com/muniv/re-novate.git
+   cd re-novate
+   ```
+
+2. 환경 변수 설정:
+   `.env` 파일을 프로젝트 루트에 생성하고 필요한 환경 변수를 설정합니다:
+   ```
+   UPSTAGE_API_KEY=…
+   OPENAI_API_KEY=sk-…
+   NEXT_PUBLIC_MAIN_API_SERVICE_TYPE=…
+   NAVER_CLIENT_ID=…
+   NAVER_CLIENT_SECRET=…
+   ```
+
+3. 의존성 설치:
+   ```bash
+   npm install
+   # 또는
+   yarn install
+   ```
+
+### 개발 서버 실행
 
 ```bash
 npm run dev
-# or
+# 또는
 yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+애플리케이션은 기본적으로 http://localhost:3000 에서 실행됩니다.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+### 프로덕션 빌드
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+```bash
+npm run build
+npm start
+# 또는
+yarn build
+yarn start
+```
 
-## Learn More
+### 배포된 버전
 
-To learn more about Next.js, take a look at the following resources:
+Re:novate의 배포된 버전은 다음 링크에서 확인할 수 있습니다: [https://re-novate.kro.kr](https://re-novate.kro.kr)
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
 
-## Deploy on Vercel
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+## 사용 방법
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+1. 리포트로 작성하고 싶은 질문 작성  
+1-1. '보고서 생성 세부설정'에서 키워드 설정, 표지 이미지 생성 여부, 참고할 url, 파일 업로드 설정
+2. 리포트 생성을 위해 활용할 데이터 선택
+3. AI가 작성한 리포트 초안을 확인  
+3-1. 수정이 필요한 부분을 클릭한 후 대화형으로 수정 가능
+3-2. 최종 리포트는 pdf로 다운로드 가능
+
+![Re-novate 사용 가이드](./images/re-novate-usage-guide.png)
+
+
+### 연락처
+문의사항이 있으시면 dmtgjh@naver.com으로 연락 주시기 바랍니다.
