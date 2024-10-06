@@ -25,6 +25,36 @@ Re:novate의 배포된 버전은 다음 링크에서 확인할 수 있습니다.
     ✨Upstage solar, document-parse  
     OpenAI GPT-4, DALL-E
 
+## LLM 활용 세부 사항
+
+Re:novate는 다양한 단계에서 LLM(Large Language Model)을 활용하여 사용자 경험을 향상시켰습니다.
+
+1. **질문 최적화** 🔍
+   - 사용자의 초기 질문을 보고서 생성에 적합하게 재구성
+   - 사용 모델: ✨Upstage Solar 또는 GPT-4
+
+2. **키워드 추천** 🏷️
+   - 질문을 분석하여 보고서 방향 설정을 위한 키워드 제안
+   - 사용 모델: ✨Upstage Solar 또는 GPT-4
+
+3. **문서 파싱** 📄
+   - 사용자 업로드 파일을 분석하여 관련 컨텍스트 추출
+   - 사용 모델: ✨Upstage Document-Parse
+
+4. **보고서 초안 생성** 📝
+   - 선택된 컨텍스트를 바탕으로 구조화된 보고서 초안 작성
+   - 사용 모델: ✨Upstage Solar 또는 GPT-4
+
+5. **프롬프트 번역** 🌐
+   - 보고서 표지 이미지 생성을 위한 프롬프트 번역
+   - 사용 모델: ✨Upstage Solar 또는 GPT-4
+
+6. **대화형 편집** 💬
+   - 사용자 요청에 따른 보고서 내용의 실시간 수정 및 개선
+   - 사용 모델: ✨Upstage Solar 또는 GPT-4
+
+*NEXT_PUBLIC_MAIN_API_SERVICE_TYPE 을 수정하여 LLM을 선택할 수 있습니다.
+
 ## 설치 및 실행 방법
 
 ### 요구사항
@@ -45,7 +75,7 @@ Re:novate의 배포된 버전은 다음 링크에서 확인할 수 있습니다.
    ```
    UPSTAGE_API_KEY=…
    OPENAI_API_KEY=sk-…
-   NEXT_PUBLIC_MAIN_API_SERVICE_TYPE=…
+   NEXT_PUBLIC_MAIN_API_SERVICE_TYPE  => solar, openai 
    NAVER_CLIENT_ID=…
    NAVER_CLIENT_SECRET=…
    ```
@@ -85,7 +115,9 @@ Re:novate의 배포된 버전은 다음 링크에서 확인할 수 있습니다:
 
 
 ## 사용 방법
+데모 영상: https://www.youtube.com/watch?v=1AmK8p4tvVE
 
+### 간단 가이드
 1. 리포트로 작성하고 싶은 질문 작성  
 1-1. '보고서 생성 세부설정'에서 키워드 설정, 표지 이미지 생성 여부, 참고할 url, 파일 업로드 설정
 2. 리포트 생성을 위해 활용할 데이터 선택
