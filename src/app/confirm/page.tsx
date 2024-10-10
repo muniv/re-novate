@@ -310,9 +310,12 @@ const ConfirmPage = () => {
                     </div>
 
                     <div className={'flex flex-col'}>
-                        <Typography.Title level={3}>📝 보고서 주제</Typography.Title>
+                        <Typography.Title level={3}>
+                            📝 보고서 주제
+                        </Typography.Title>
                         <span className={'text-[14px] text-gray-400'}>
-                            아래 질문과 키워드를 기반으로 보고서를 작성합니다. 맞는지 확인해주세요.
+                            아래 질문과 키워드를 기반으로 보고서를 작성합니다.
+                            맞는지 확인해주세요.
                         </span>
                     </div>
 
@@ -400,101 +403,116 @@ const ConfirmPage = () => {
                     </div>
 
                     {/* (2) 외부지식 (웹검색): 네이버 검색 결과, URL 지정 */}
-                    <div className={'flex flex-col'}>
-                        <Typography.Title level={3}>🌐 외부지식 (웹검색)</Typography.Title>
-                        <span className={'text-[14px] text-gray-400'}>
-                            아래의 검색 결과 중 보고서 작성시 사용할
-                            링크를 선택해주세요.
-                        </span>
-                    </div>
-                    {draftData.urls.length > 0 && (
+                    <div className={"flex flex-col"}>
                         <div className={'flex flex-col'}>
-                            <div className={'flex items-end'}>
-                                <div className={'flex flex-col'}>
+                            <Typography.Title level={3}>
+                                🌐 외부지식 (웹검색)
+                            </Typography.Title>
+                            <span className={'text-[14px] text-gray-400'}>
+                            아래의 검색 결과 중 보고서 작성시 사용할 링크를
+                            선택해주세요.
+                        </span>
+                        </div>
+                        {draftData.urls.length > 0 && (
+                            <div className={'flex flex-col'}>
+                                <div className={'flex items-end'}>
+                                    <div className={'flex flex-col'}>
                                     <span className={'text-[18px] font-bold'}>
                                         참고 URL (입력한 URL)
                                     </span>
+                                    </div>
                                 </div>
+
+                                <UrlContentItemList
+                                    contents={draftData.urlContents}
+                                    urls={draftData.urls}
+                                    selectedItems={selectedUrlItems}
+                                    onSelectionChange={handleSearchSelectionChange}
+                                />
                             </div>
+                        )}
 
-                            <SizedBox height={16} />
+                        <SizedBox height={24}/>
 
-                            <UrlContentItemList
-                                contents={draftData.urlContents}
-                                urls={draftData.urls}
-                                selectedItems={selectedUrlItems}
-                                onSelectionChange={handleSearchSelectionChange}
-                            />
-                        </div>
-                    )}
-
-                    {naverSearchItems.length > 0 && (
-                        <div className={'flex flex-col'}>
-                            <div className={'flex items-end'}>
-                                <div className={'flex flex-col'}>
+                        {naverSearchItems.length > 0 && (
+                            <div className={'flex flex-col'}>
+                                <div className={'flex items-end'}>
+                                    <div className={'flex flex-col'}>
                                     <span className={'text-[18px] font-bold'}>
                                         웹검색 결과
                                     </span>
+                                    </div>
+
+                                    <div className={'flex-1'} />
+                                    <span
+                                        onClick={handleToggleSearchSelectAll}
+                                        className="text-blue-500 cursor-pointer"
+                                    >
+                                    {isAllSelected ? '전체 해제' : '전체 선택'}
+                                </span>
                                 </div>
 
-                                <div className={'flex-1'} />
-                                <span
-                                    onClick={handleToggleSearchSelectAll}
-                                    className="text-blue-500 cursor-pointer"
-                                >
-                                    {isAllSelected ? '전체 해제' : '전체 선택'}
+                                <SizedBox height={16} />
+
+                                <NaverSearchItemList
+                                    items={naverSearchItems}
+                                    isAllSelected={isAllSelected}
+                                    onToggleSelectAll={handleToggleSearchSelectAll}
+                                    selectedItems={selectedSearchItems}
+                                    onSelectionChange={(index) => {
+                                        const updatedSelectedItems = new Set(
+                                            selectedSearchItems
+                                        ) // create a new Set to avoid mutation
+                                        if (updatedSelectedItems.has(index)) {
+                                            updatedSelectedItems.delete(index)
+                                        } else {
+                                            updatedSelectedItems.add(index)
+                                        }
+                                        setSelectedSearchItems(updatedSelectedItems) // set the new Set
+                                    }}
+                                />
+                            </div>
+                        )}
+                    </div>
+
+
+                    {/* (3) 내부지식 (문서): 첨부파일 제공 */}
+                    {draftData.docFiles.length > 0 && (
+                        <div className={'flex flex-col'}>
+                            <div className={'flex flex-col'}>
+                                <Typography.Title level={3}>
+                                    📂 내부지식 (문서)
+                                </Typography.Title>
+                                <span className={'text-[14px] text-gray-400'}>
+                                    입력한 파일 중 보고서 작성시 사용할 파일을
+                                    선택해주세요.
                                 </span>
                             </div>
 
-                            <SizedBox height={16} />
+                            <SizedBox height={24} />
 
-                            <NaverSearchItemList
-                                items={naverSearchItems}
-                                isAllSelected={isAllSelected}
-                                onToggleSelectAll={handleToggleSearchSelectAll}
-                                selectedItems={selectedSearchItems}
-                                onSelectionChange={(index) => {
-                                    const updatedSelectedItems = new Set(
-                                        selectedSearchItems
-                                    ) // create a new Set to avoid mutation
-                                    if (updatedSelectedItems.has(index)) {
-                                        updatedSelectedItems.delete(index)
-                                    } else {
-                                        updatedSelectedItems.add(index)
-                                    }
-                                    setSelectedSearchItems(updatedSelectedItems) // set the new Set
-                                }}
-                            />
-                        </div>
-                    )}
-
-                    {/* (3) 내부지식 (문서): 첨부파일 제공 */}
-                    <div className={'flex flex-col'}>
-                        <Typography.Title level={3}>📂 내부지식 (문서)</Typography.Title>
-                        <span className={'text-[14px] text-gray-400'}>
-                            입력한 파일 중 보고서 작성시 사용할 파일을 선택해주세요.
-                        </span>
-                    </div>
-                    {draftData.docFiles.length > 0 && (
-                        <div className={'flex flex-col'}>
-                            <div className={'flex items-end'}>
-                                <div className={'flex flex-col'}>
-                                    <span className={'text-[18px] font-bold'}>
-                                        참고 파일 (입력한 파일)
-                                    </span>
+                            <div className={'flex flex-col'}>
+                                <div className={'flex items-end'}>
+                                    <div className={'flex flex-col'}>
+                                        <span
+                                            className={'text-[18px] font-bold'}
+                                        >
+                                            참고 파일 (입력한 파일)
+                                        </span>
+                                    </div>
                                 </div>
+
+                                <SizedBox height={12} />
+
+                                <OcrContentItemList
+                                    files={draftData.docFiles}
+                                    ocrContents={draftData.docContents}
+                                    selectedItems={selectedAttachedDocItems}
+                                    onSelectionChange={
+                                        handleAttahcedDocSelectionChange
+                                    }
+                                />
                             </div>
-
-                            <SizedBox height={16} />
-
-                            <OcrContentItemList
-                                files={draftData.docFiles}
-                                ocrContents={draftData.docContents}
-                                selectedItems={selectedAttachedDocItems}
-                                onSelectionChange={
-                                    handleAttahcedDocSelectionChange
-                                }
-                            />
                         </div>
                     )}
                 </div>
