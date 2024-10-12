@@ -4,6 +4,7 @@ export interface INaverSearchItem {
     title: string
     link: string
     description: string
+    embeddingScore?: number[]
 }
 
 export type IWebSearchItem = INaverSearchItem

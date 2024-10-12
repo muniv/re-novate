@@ -28,6 +28,7 @@ import { ExclamationCircleOutlined } from '@ant-design/icons'
 import { AlertCircleIcon } from 'lucide-react'
 import GradientText from '@/components/ui/text/GradientText'
 import { Typography } from 'antd'
+import { getCosineSimilarity } from '@/util/VectorUtils'
 
 export default function Confirm() {
     return (
@@ -141,6 +142,72 @@ const ConfirmPage = () => {
         }
     }
 
+    const getEmbeddingScoresOnSearchResults = async (
+        naverSearchResults: INaverSearchItem[]
+    ) => {
+        const queries = naverSearchResults.map(
+            (item) => item.title + item.description
+        )
+        const embeddingResponse = await apiClient.fetchEmbeddingScores(queries)
+        const updatedNaverSearchResults: INaverSearchItem[] =
+            naverSearchResults.map((naverSearchResult, index) => {
+                const embeddingData = embeddingResponse.data.find(
+                    (data) => data.index === index
+                )
+
+                return {
+                    ...naverSearchResult,
+                    embeddingScore: embeddingData?.embedding,
+                }
+            })
+        return updatedNaverSearchResults
+    }
+
+    const rerankOnNaverSearchResults = async (
+        question: string,
+        naverSearchResults: INaverSearchItem[],
+        threshold: number = 0.5 // Add threshold parameter
+    ) => {
+        // Fetch question embedding and search result embeddings concurrently
+        const [questionEmbeddingScore, embeddedNaverSearchItems] =
+            await Promise.all([
+                apiClient.fetchEmbeddingScores([question]), // Fetch embedding score for the question
+                getEmbeddingScoresOnSearchResults(naverSearchResults), // Fetch embedding scores for the search results
+            ])
+
+        const questionEmbedding = questionEmbeddingScore.data[0].embedding
+        const searchResultEmbeddings = embeddedNaverSearchItems.map(
+            (item) => item.embeddingScore ?? []
+        )
+
+        // Compute cosine similarities for all search results
+        const cosineSimilarities = await Promise.all(
+            searchResultEmbeddings.map((embedding) =>
+                Promise.resolve(
+                    getCosineSimilarity(questionEmbedding, embedding)
+                )
+            )
+        )
+
+        // Attach cosine similarity to each search result item
+        const rankedResults = embeddedNaverSearchItems.map((item, index) => ({
+            ...item,
+            cosineSimilarity: cosineSimilarities[index], // Add cosine similarity to each item
+        }))
+
+        // Filter results based on the cosine similarity threshold
+        const filteredResults = rankedResults.filter(
+            (item) => item.cosineSimilarity >= threshold
+        )
+
+        // Sort search results by cosine similarity in descending order
+        const sortedResults = filteredResults.sort(
+            (a, b) => b.cosineSimilarity - a.cosineSimilarity
+        )
+
+        return sortedResults
+    }
+
     // URL 기반 데이터 가져오기
     const startGetUrlContents = async () => {
         const urlContents = await fetchDataFromUrls(draftData.urls)
@@ -196,7 +263,14 @@ const ConfirmPage = () => {
             // 네이버 검색
             setLoadingMessage('인터넷 검색중이에요..')
             const naverSearchItems = await searchDataByNaver(searchKeyword)
-            setNaverSearchItems(naverSearchItems)
+
+            setLoadingMessage('데이터를 필터링하고 있습니다..')
+            const rerankedSearchItems = await rerankOnNaverSearchResults(
+                question,
+                naverSearchItems
+            )
+
+            setNaverSearchItems(rerankedSearchItems)
 
             setDraftData((prevDraftData) => ({
                 ...prevDraftData,
@@ -403,23 +477,25 @@ const ConfirmPage = () => {
                     </div>
 
                     {/* (2) 외부지식 (웹검색): 네이버 검색 결과, URL 지정 */}
-                    <div className={"flex flex-col"}>
+                    <div className={'flex flex-col'}>
                         <div className={'flex flex-col'}>
                             <Typography.Title level={3}>
                                 🌐 외부지식 (웹검색)
                             </Typography.Title>
                             <span className={'text-[14px] text-gray-400'}>
-                            아래의 검색 결과 중 보고서 작성시 사용할 링크를
-                            선택해주세요.
-                        </span>
+                                아래의 검색 결과 중 보고서 작성시 사용할 링크를
+                                선택해주세요.
+                            </span>
                         </div>
                         {draftData.urls.length > 0 && (
                             <div className={'flex flex-col'}>
                                 <div className={'flex items-end'}>
                                     <div className={'flex flex-col'}>
-                                    <span className={'text-[18px] font-bold'}>
-                                        참고 URL (입력한 URL)
-                                    </span>
+                                        <span
+                                            className={'text-[18px] font-bold'}
+                                        >
+                                            참고 URL (입력한 URL)
+                                        </span>
                                     </div>
                                 </div>
 
@@ -427,20 +503,24 @@ const ConfirmPage = () => {
                                     contents={draftData.urlContents}
                                     urls={draftData.urls}
                                     selectedItems={selectedUrlItems}
-                                    onSelectionChange={handleSearchSelectionChange}
+                                    onSelectionChange={
+                                        handleSearchSelectionChange
+                                    }
                                 />
                             </div>
                         )}
 
-                        <SizedBox height={24}/>
+                        <SizedBox height={24} />
 
                         {naverSearchItems.length > 0 && (
                             <div className={'flex flex-col'}>
                                 <div className={'flex items-end'}>
                                     <div className={'flex flex-col'}>
-                                    <span className={'text-[18px] font-bold'}>
-                                        웹검색 결과
-                                    </span>
+                                        <span
+                                            className={'text-[18px] font-bold'}
+                                        >
+                                            웹검색 결과
+                                        </span>
                                     </div>
 
                                     <div className={'flex-1'} />
@@ -448,8 +528,10 @@ const ConfirmPage = () => {
                                         onClick={handleToggleSearchSelectAll}
                                         className="text-blue-500 cursor-pointer"
                                     >
-                                    {isAllSelected ? '전체 해제' : '전체 선택'}
-                                </span>
+                                        {isAllSelected
+                                            ? '전체 해제'
+                                            : '전체 선택'}
+                                    </span>
                                 </div>
 
                                 <SizedBox height={16} />
@@ -457,7 +539,9 @@ const ConfirmPage = () => {
                                 <NaverSearchItemList
                                     items={naverSearchItems}
                                     isAllSelected={isAllSelected}
-                                    onToggleSelectAll={handleToggleSearchSelectAll}
+                                    onToggleSelectAll={
+                                        handleToggleSearchSelectAll
+                                    }
                                     selectedItems={selectedSearchItems}
                                     onSelectionChange={(index) => {
                                         const updatedSelectedItems = new Set(
@@ -468,13 +552,14 @@ const ConfirmPage = () => {
                                         } else {
                                             updatedSelectedItems.add(index)
                                         }
-                                        setSelectedSearchItems(updatedSelectedItems) // set the new Set
+                                        setSelectedSearchItems(
+                                            updatedSelectedItems
+                                        ) // set the new Set
                                     }}
                                 />
                             </div>
                         )}
                     </div>
-
 
                     {/* (3) 내부지식 (문서): 첨부파일 제공 */}
                     {draftData.docFiles.length > 0 && (

@@ -11,6 +11,7 @@ import {
 } from './api/chat'
 import { fetchNaverSearchResponse } from '@/lib/api/naverSearch'
 import { fetchOCRResult } from '@/lib/api/ocr'
+import { fetchEmbeddingScores } from '@/lib/api/embeddding'
 
 const apiClient = {
     fetchChatResponse,
@@ -24,6 +25,7 @@ const apiClient = {
     fetchOCRResult,
     fetchDallEResponse,
     fetchTranslateKeywordsToEnglish,
+    fetchEmbeddingScores,
 }
 
 export default apiClient

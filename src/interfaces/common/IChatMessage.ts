@@ -11,9 +11,13 @@ export interface IChatRequestBody {
     messages: IChatMessage[]
 }
 
-// IChatResponse 인터페이스 정의
-export interface IChatResponse {
+export interface IApiResponse {
     success: boolean
-    data: string
+    data: unknown
     error?: string
+}
+
+// IChatResponse 인터페이스 정의
+export interface IChatResponse extends IApiResponse {
+    data: string
 }
