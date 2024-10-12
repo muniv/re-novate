@@ -242,6 +242,13 @@ const ConfirmPage = () => {
         }))
     }
 
+    const selectAllSearchedItems = (items: INaverSearchItem[]) => {
+        // 초기 이니셜라이즈시 모든 항목에 대해 선택시킨다.
+        const allItems = new Set(items.map((_, index) => index))
+        setSelectedSearchItems(allItems) // 전체 선택
+        setIsAllSearchItemsSelected(true)
+    }
+
     const initialize = async () => {
         const question = draftData.question ?? ''
         console.log(`question: ${question}`)
@@ -274,8 +281,10 @@ const ConfirmPage = () => {
 
             setDraftData((prevDraftData) => ({
                 ...prevDraftData,
-                naverSearchItems: naverSearchItems,
+                naverSearchItems: rerankedSearchItems,
             }))
+
+            selectAllSearchedItems(rerankedSearchItems)
         } finally {
             setLoading(false)
         }
