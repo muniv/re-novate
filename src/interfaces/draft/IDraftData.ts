@@ -1,5 +1,6 @@
 // 초안 키워드, 첨부파일들을 상태관리하기 위한 인터페이스
 import { INaverSearchItem } from '@/interfaces/search/INaverSearch'
+import { LLMType } from '@/Constants'
 
 export interface IDraftData {
     question?: string // 질문

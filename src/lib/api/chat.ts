@@ -1,6 +1,6 @@
 import { IChatMessage, IChatResponse } from '@/interfaces/common/IChatMessage'
 import { getPrompt } from '@/util/PromptUtils'
-import { LLMTasks } from '@/Constants'
+import { LLMTasks, LLMType } from '@/Constants'
 
 export const fetchChatResponse = async (
     messages: IChatMessage[]
@@ -41,12 +41,12 @@ export const fetchChatResponse = async (
 }
 
 export const fetchSearchKeywords = async (
-    question: string
+    question: string,
+    llmType: LLMType = LLMType.openai
 ): Promise<IChatResponse> => {
     try {
         const prompt = getPrompt(LLMTasks.extractSearchKeywords, question)
-        const serviceType = process.env.NEXT_PUBLIC_MAIN_API_SERVICE_TYPE
-        const res = await fetch(`/api/${serviceType}/chat`, {
+        const res = await fetch(`/api/${llmType}/chat`, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
@@ -92,10 +92,11 @@ export const fetchSearchKeywords = async (
 export const fetchReportMarkdown = async (
     question: string,
     context: string,
-    imageUrl?: string
+    imageUrl?: string,
+    llmType: LLMType = LLMType.openai
 ): Promise<IChatResponse> => {
     try {
-        const prompt = getPrompt(
+        let prompt = getPrompt(
             LLMTasks.generateReport,
             question,
             context,
@@ -103,12 +104,12 @@ export const fetchReportMarkdown = async (
             imageUrl
         )
 
-        console.log('### PROMPT!!')
-        console.log(prompt)
-        console.log('### PROMPT!!')
+        if (llmType === LLMType.solar) {
+            const translateResult = await fetchTranslate(prompt)
+            prompt = translateResult.data ?? ''
+        }
 
-        const serviceType = process.env.NEXT_PUBLIC_MAIN_API_SERVICE_TYPE
-        const res = await fetch(`/api/${serviceType}/chat`, {
+        const res = await fetch(`/api/${llmType}/chat`, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
@@ -124,6 +125,53 @@ export const fetchReportMarkdown = async (
                     {
                         role: 'user',
                         content: prompt,
+                    },
+                ],
+            }),
+        })
+
+        if (!res.ok) {
+            throw new Error('Failed to fetch chat response')
+        }
+
+        // JSON 응답 처리
+        const data = await res.json()
+
+        return {
+            success: data['success'],
+            data: data['data'], // 응답 데이터를 반환
+        }
+    } catch (error) {
+        console.error('Error fetching chat response:', error)
+        return {
+            success: false,
+            data: '',
+            error: error instanceof Error ? error.message : 'Unknown error',
+        }
+    }
+}
+
+export const fetchTranslate = async (
+    question: string,
+    llmType: LLMType = LLMType.solar
+): Promise<IChatResponse> => {
+    try {
+        const res = await fetch(`/api/${llmType}/translate`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                innovation: 'RN7MGKVRA8',
+            },
+            body: JSON.stringify({
+                temperature: 0,
+                messages: [
+                    {
+                        role: 'system',
+                        content: 'You are a helpful assistant.',
+                    },
+                    {
+                        role: 'user',
+                        content: question,
                     },
                 ],
             }),
@@ -344,17 +392,22 @@ export const fetchRearrangedContexts = async (
 }
 
 export const fetchDallEResponse = async (
-    message: string // messages를 받습니다.
+    message: string, // messages를 받습니다.
+    llmType: LLMType = LLMType.openai
 ): Promise<IChatResponse> => {
     try {
         // messages 배열에서 prompt로 사용할 텍스트 추출
-        const prompt = message || 'data, report'
+        let prompt = message || 'data, report'
         //const prompt = message
         //    ? `A modern and futuristic artwork incorporating the following keywords: ${message}. The design should visually reflect these concepts, using digital lines, data patterns, and other relevant elements. For example, if the keyword is related to finance, incorporate subtle financial charts or stock graphs into the background. The color palette should align with the theme of the keywords, using sleek and professional tones like blues, greys, or other fitting colors. No text or book structure should be present, just the visual elements completely filling the canvas.`
         //    : 'A modern and futuristic artwork incorporating the following keywords: data, report. The design should visually reflect these concepts, using digital lines, data patterns, and other relevant elements. For example, if the keyword is related to finance, incorporate subtle financial charts or stock graphs into the background. The color palette should align with the theme of the keywords, using sleek and professional tones like blues, greys, or other fitting colors. No text or book structure should be present, just the visual elements completely filling the canvas.'
         // 로그 추가
-        console.log('DALL·E Keywords:', message);
-        console.log('DALL·E prompt:', prompt);
+        console.log('DALL·E Keywords:', message)
+        console.log('DALL·E prompt:', prompt)
+
+        // 달리 생성시 한 -> 영어 번역 추가
+        const translateResult = await fetchTranslate(prompt)
+        prompt = translateResult.data
 
         const res = await fetch(`/api/openai/dalle`, {
             method: 'POST',
@@ -393,7 +446,8 @@ export const fetchDallEResponse = async (
     }
 }
 
-export const fetchTranslateKeywordsToEnglish = async ( // 이름 변경
+export const fetchTranslateKeywordsToEnglish = async (
+    // 이름 변경
     keywords: string
 ): Promise<IChatResponse> => {
     try {

@@ -7,7 +7,8 @@ import {
     fetchRearrangedContexts,
     fetchDallEResponse,
     fetchKeywordForDalle,
-    fetchTranslateKeywordsToEnglish, // 이름 변경
+    fetchTranslateKeywordsToEnglish,
+    fetchTranslate, // 이름 변경
 } from './api/chat'
 import { fetchNaverSearchResponse } from '@/lib/api/naverSearch'
 import { fetchOCRResult } from '@/lib/api/ocr'
@@ -26,6 +27,7 @@ const apiClient = {
     fetchDallEResponse,
     fetchTranslateKeywordsToEnglish,
     fetchEmbeddingScores,
+    fetchTranslate,
 }
 
 export default apiClient

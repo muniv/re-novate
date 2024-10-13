@@ -317,7 +317,7 @@ const SearchDetailModal: React.FC<SearchDetailModalProps> = ({
                                 }}
                                 options={[
                                     {
-                                        value: LLMType.chatGPT,
+                                        value: LLMType.openai,
                                         label: 'ChatGPT 4o',
                                     },
                                     { value: LLMType.solar, label: 'Solar' },

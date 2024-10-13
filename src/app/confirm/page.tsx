@@ -29,6 +29,7 @@ import { AlertCircleIcon } from 'lucide-react'
 import GradientText from '@/components/ui/text/GradientText'
 import { Typography } from 'antd'
 import { getCosineSimilarity } from '@/util/VectorUtils'
+import { settingsAtom } from '@/atoms/settingsAtom'
 
 export default function Confirm() {
     return (
@@ -44,6 +45,7 @@ const ConfirmPage = () => {
     const [messageApi, contextHolder] = message.useMessage()
     const [loadingMessage, setLoadingMessage] = useState('잠시만 기다려주세요!')
     const [draftData, setDraftData] = useRecoilState(draftDataAtom)
+    const [settings, setSettings] = useRecoilState(settingsAtom)
     const [isAllSelected, setIsAllSearchItemsSelected] = useState(false)
     const [isEditingQuestion, setIsEditingQuestion] = useState(false)
     const [isEditingKeyword, setIsEditingKeyword] = useState(false)
@@ -84,7 +86,11 @@ const ConfirmPage = () => {
     }
 
     const getSearchKeywords = async (question: string) => {
-        const searchKeywords = await apiClient.fetchSearchKeywords(question)
+        const llmType = settings.selectedLLM
+        const searchKeywords = await apiClient.fetchSearchKeywords(
+            question,
+            llmType
+        )
         const filteredSearchKeywords = filterKeywords(searchKeywords.data)
         return filteredSearchKeywords
     }
@@ -166,7 +172,7 @@ const ConfirmPage = () => {
     const rerankOnNaverSearchResults = async (
         question: string,
         naverSearchResults: INaverSearchItem[],
-        threshold: number = 0.5 // Add threshold parameter
+        threshold: number = 0.3 // Add threshold parameter
     ) => {
         // Fetch question embedding and search result embeddings concurrently
         const [questionEmbeddingScore, embeddedNaverSearchItems] =

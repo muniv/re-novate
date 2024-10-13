@@ -4,7 +4,7 @@ import React, { useRef, ChangeEvent, useState } from 'react'
 import { ArrowRight, PlusCircle, SendIcon, SettingsIcon, X } from 'lucide-react'
 import SizedBox from '@/components/ui/box/SizedBox'
 import { IChatMessage } from '@/interfaces/common/IChatMessage'
-import { message, Select, Tooltip } from 'antd'
+import { message, Select, Switch, Tooltip } from 'antd'
 
 interface MessageInputProps {
     question: string

@@ -5,6 +5,6 @@ import { LLMType } from '@/Constants'
 export const settingsAtom = atom<ISettings>({
     key: 'settingsAtom',
     default: {
-        selectedLLM: LLMType.chatGPT,
+        selectedLLM: LLMType.openai,
     },
 })

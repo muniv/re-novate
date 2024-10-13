@@ -5,8 +5,8 @@ export enum ChatExampleType {
 }
 
 export enum LLMType {
-    chatGPT,
-    solar,
+    openai = 'openai',
+    solar = 'solar',
 }
 
 export enum LLMTasks {

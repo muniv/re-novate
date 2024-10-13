@@ -1,4 +1,4 @@
-import { ChatExampleType } from '@/Constants'
+import { ChatExampleType, LLMType } from '@/Constants'
 import React from 'react'
 
 export interface IChatExample {
@@ -6,4 +6,5 @@ export interface IChatExample {
     description?: string
     type?: ChatExampleType
     icon?: React.ReactNode
+    selectedLLM?: LLMType
 }

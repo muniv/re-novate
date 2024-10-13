@@ -20,11 +20,13 @@ const ChatExampleBox: React.FC<ExampleBoxProps> = ({
             style={{ width: '200px', height: '130px' }}
             onClick={onClick}
         >
-            <p className="text-black text-sm font-medium">{title}</p>
+            <p className="text-black text-sm font-medium line-clamp-1">
+                {title}
+            </p>
             <SizedBox height={8} />
             <div className={'overflow-ellipsis'}>
                 <span
-                    className={'text-gray-500 text-[12px]'}
+                    className={'text-gray-500 text-[12px] line-clamp-2'}
                     style={{
                         display: '-webkit-box',
                         WebkitBoxOrient: 'vertical',

@@ -5,7 +5,7 @@ import { Suspense, useEffect, useState } from 'react'
 import { IChatMessage } from '@/interfaces/common/IChatMessage'
 import ChatWithMarkdownUI from '@/components/page/generate/ChatWithMarkdownUI'
 import apiClient from '@/lib/apiClient'
-import { appRoutes, LLMTasks } from '@/Constants'
+import { appRoutes, LLMTasks, LLMType } from '@/Constants'
 import { useRouter, useSearchParams } from 'next/navigation'
 import {
     IBlogSearchItem,
@@ -18,6 +18,8 @@ import { getPrompt } from '@/util/PromptUtils'
 import { EditMarkdownModal } from '@/components/ui/modals/EditMarkdownModal'
 import { useRecoilState } from 'recoil'
 import { draftDataAtom } from '@/atoms/draftDataAtom'
+import { settingsAtom } from '@/atoms/settingsAtom'
+import { fetchReportMarkdown } from '@/lib/api/chat'
 
 export default function Generate() {
     return (
@@ -31,6 +33,7 @@ function GenerateContent() {
     const searchParams = useSearchParams() // 쿼리 파���미터 읽기
     const [loading, setLoading] = useState(true)
     const [draftData, setDraftData] = useRecoilState(draftDataAtom)
+    const [settings, setSettings] = useRecoilState(settingsAtom)
     const [visiblePdfEditModal, setVisiblePdfEditModal] = useState(false)
     const router = useRouter()
 
@@ -149,6 +152,8 @@ function GenerateContent() {
         }
     }
 
+    const translateEngToKor = () => {}
+
     // 마크다운 보고서 작성
     const makeMarkdownReport = async (
         question: string,
@@ -156,8 +161,18 @@ function GenerateContent() {
         imageUrl?: string
     ) => {
         console.log(`[makeMarkdownReport] imageUrl : ${imageUrl}`)
+        const llmType = settings.selectedLLM
 
-        return await apiClient.fetchReportMarkdown(question, context, imageUrl)
+        if (llmType === LLMType.solar) {
+            //한글 -> 영어 번역 수행
+        }
+
+        return await apiClient.fetchReportMarkdown(
+            question,
+            context,
+            imageUrl,
+            llmType
+        )
     }
 
     function generateRandomNumber(length: number = 15): number {
@@ -268,10 +283,14 @@ function GenerateContent() {
     const generateDalleImage = async (question: string) => {
         try {
             // 키워드를 영어로 번역
-            const translationResponse = await apiClient.fetchTranslateKeywordsToEnglish(question) // 이름 ��경
-            
+            const translationResponse =
+                await apiClient.fetchTranslateKeywordsToEnglish(question) // 이름 ��경
+
             if (!translationResponse.success) {
-                console.error('Failed to translate keywords:', translationResponse.error)
+                console.error(
+                    'Failed to translate keywords:',
+                    translationResponse.error
+                )
                 return undefined
             }
 
@@ -279,7 +298,8 @@ function GenerateContent() {
             console.log('Translated Keywords:', translatedKeywords)
 
             // 번역된 키워드를 사용하여 DALL·E 응답 요청
-            const response = await apiClient.fetchDallEResponse(translatedKeywords)
+            const response =
+                await apiClient.fetchDallEResponse(translatedKeywords)
 
             if (response.success) {
                 return response.data
@@ -313,7 +333,7 @@ function GenerateContent() {
 
                 setLoadingMessage('이미지를 그리고 있어요..')
                 // 2. 보고서용 이미지 생성
-                console.log('Keywords:', keywords);
+                console.log('Keywords:', keywords)
                 imageUrl = await generateDalleImage(keywords)
             }
 
