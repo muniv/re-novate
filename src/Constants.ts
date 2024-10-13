@@ -4,6 +4,11 @@ export enum ChatExampleType {
     email,
 }
 
+export enum LLMType {
+    chatGPT,
+    solar,
+}
+
 export enum LLMTasks {
     qa, //일반 질문 답변
     extractSearchKeywords, //검색 키워드 추출

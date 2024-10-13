@@ -4,6 +4,7 @@ import {
     message,
     Modal,
     Popover,
+    Radio,
     Select,
     Space,
     Switch,
@@ -17,6 +18,8 @@ import UrlInput from '@/components/ui/input/UrlInput'
 import { X, PlusCircle } from 'lucide-react'
 import { useRecoilState } from 'recoil'
 import { draftDataAtom } from '@/atoms/draftDataAtom'
+import { LLMType } from '@/Constants'
+import { settingsAtom } from '@/atoms/settingsAtom'
 
 interface SearchDetailModalProps {
     modalOpen: boolean
@@ -46,6 +49,7 @@ const SearchDetailModal: React.FC<SearchDetailModalProps> = ({
     const [messageApi, contextHolder] = message.useMessage()
     const [isKeywordLoading, setIsKeywordLoading] = useState(false)
     const [draftData, setDraftData] = useRecoilState(draftDataAtom)
+    const [settings, setSettings] = useRecoilState(settingsAtom)
     const fileInputRef = useRef<HTMLInputElement>(null)
 
     const [reArrangeQuestionLoading, setReArrangeQuestionLoading] =
@@ -78,6 +82,13 @@ const SearchDetailModal: React.FC<SearchDetailModalProps> = ({
         setDraftData((prevDraftData) => ({
             ...prevDraftData,
             searchQueryCount: value,
+        }))
+    }
+
+    const handleLLMTypeChange = (value: LLMType) => {
+        setSettings((prevSettings) => ({
+            ...prevSettings,
+            selectedLLM: value,
         }))
     }
 
@@ -282,6 +293,37 @@ const SearchDetailModal: React.FC<SearchDetailModalProps> = ({
                                     </button>
                                 </div>
                             ))}
+                        </div>
+                    </div>
+
+                    {/* (4) LLM 선택 */}
+                    <div className={'flex flex-col  gap-[12px]'}>
+                        <span className={'text-[20px] font-bold'}>
+                            🔥 생성 세팅
+                        </span>
+
+                        <div className={'flex flex-col w-full items-start'}>
+                            <span className={'w-fit font-bold'}>LLM 선택</span>
+                            <SizedBox height={4} />
+                            <span className={'w-fit text-[12px] text-gray-400'}>
+                                보고서 생성에 사용할 LLM을 선택합니다.
+                            </span>
+                            <SizedBox height={8} />
+                            <Select
+                                value={settings.selectedLLM}
+                                onChange={handleLLMTypeChange}
+                                style={{
+                                    width: '120px',
+                                }}
+                                options={[
+                                    {
+                                        value: LLMType.chatGPT,
+                                        label: 'ChatGPT 4o',
+                                    },
+                                    { value: LLMType.solar, label: 'Solar' },
+                                ]}
+                                className="w-[60px]"
+                            />
                         </div>
                     </div>
                 </div>
