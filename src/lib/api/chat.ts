@@ -45,7 +45,14 @@ export const fetchSearchKeywords = async (
     llmType: LLMType = LLMType.openai
 ): Promise<IChatResponse> => {
     try {
-        const prompt = getPrompt(LLMTasks.extractSearchKeywords, question)
+        let prompt = getPrompt(LLMTasks.extractSearchKeywords, question)
+
+        // 솔라인 경우, 키워드를 프롬프트 영어로 변환
+        if (llmType === LLMType.solar) {
+            const translateResult = await fetchTranslate(prompt)
+            prompt = translateResult.data ?? ''
+        }
+
         const res = await fetch(`/api/${llmType}/chat`, {
             method: 'POST',
             headers: {
