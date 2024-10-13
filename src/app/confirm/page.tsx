@@ -85,6 +85,21 @@ const ConfirmPage = () => {
         return sortedUniqueWords.slice(0, maxCount).join(' ')
     }
 
+    const getTableContents = async (question: string) => {
+        const llmType = settings.selectedLLM;
+        const schema = {
+            type: "object",
+            properties: {
+                keywords: { 
+                    type: "array",
+                    items: { type: "string" }
+                }
+            },
+            required: ["keywords"]
+        };
+        return null;
+    }
+
     const getSearchKeywords = async (question: string) => {
         const llmType = settings.selectedLLM
         const searchKeywords = await apiClient.fetchSearchKeywords(
@@ -267,6 +282,11 @@ const ConfirmPage = () => {
             startOCR()
 
             setLoading(true)
+
+            // 목차 생성
+            setLoadingMessage('목차를 생성하고 있습니다..')
+            const generateTableContents = await getTableContents(question)
+            console.log(generateTableContents)
 
             // 검색 키워드 추출
             setLoadingMessage('검색 키워드를 추출하고 있습니다..')

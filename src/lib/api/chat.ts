@@ -501,3 +501,46 @@ export const fetchTranslateKeywordsToEnglish = async (
         }
     }
 }
+
+export const fetchStructuredResponse = async (
+    messages: IChatMessage[],
+    schema: object // JSON 스키마를 인자로 받음
+): Promise<IChatResponse> => {
+    try {
+        const res = await fetch(`/api/openai/structuredChat`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                innovation: 'RN7MGKVRA8',
+            },
+            body: JSON.stringify({
+                temperature: 0.2,
+                messages,
+                response_format: {
+                    type: "json_schema",
+                    json_schema: schema, // JSON 스키마를 사용하여 구조화된 응답 요청
+                    strict: true
+                },
+            }),
+        })
+
+        if (!res.ok) {
+            throw new Error('Failed to fetch structured chat response')
+        }
+
+        // JSON 응답 처리
+        const data = await res.json()
+
+        return {
+            success: data['success'],
+            data: data['data'], // 스키마에 맞는 응답 데이터를 반환
+        }
+    } catch (error) {
+        console.error('Error fetching structured chat response:', error)
+        return {
+            success: false,
+            data: '',
+            error: error instanceof Error ? error.message : 'Unknown error',
+        }
+    }
+}
