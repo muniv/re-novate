@@ -503,10 +503,63 @@ export const fetchTranslateKeywordsToEnglish = async (
 }
 
 export const fetchStructuredResponse = async (
-    messages: IChatMessage[],
-    schema: object // JSON 스키마를 인자로 받음
+    question: string
 ): Promise<IChatResponse> => {
     try {
+        const systemPrompt = {
+            role: "system",
+            content: "You are a report generator that provides only the titles of each section in a structured report in Korean. Respond to user prompts by generating a title for each report section: Title, Introduction, Body1, Body2, Body3, Body4, Body5, and Conclusion. Return only the section titles without any labels, in a way that flows naturally."
+        }
+        const userPrompt = {
+            role: "user",
+            content: `주제 '${question}'에 대한 보고서 개요를 작성해 주세요. 각 섹션의 제목만 제공하며, 다음 구조를 따르세요:\n\n- **제목**: 보고서의 메인 제목\n- **소개**: 소개 섹션의 제목\n- **본론1**부터 **본론5**: 각 본론 섹션의 제목\n- **결론**: 결론 섹션의 제목\n\n각 제목은 간결하고 주제 '${question}'와 관련된 내용이어야 하며, "본론1", "본론2" 등의 라벨 없이 제목만 반환해 주세요.`
+        };
+        
+        const jsonSchema = {
+            name: "structured_response",
+            strict: true,
+            schema: {
+              type: "object",
+              properties: {
+                tableContents: {
+                  type: "array",
+                  items: {
+                    type: "object",
+                    properties: {
+                        title: {
+                        type: "string"
+                      },
+                      introduction: {
+                        type: "string"
+                      },
+                      body1: {
+                        type: "string"
+                      },
+                      body2: {
+                        type: "string"
+                      },
+                      body3: {
+                        type: "string"
+                      },
+                      body4: {
+                        type: "string"
+                      },
+                      body5: {
+                        type: "string"
+                      },
+                      conclusion: {
+                        type: "string"
+                      },
+                    },
+                    required: ["title", "introduction", "body1", "body2", "body3", "body4", "body5", "conclusion"],
+                    additionalProperties: false
+                  }
+                },
+              },
+              required: ["tableContents"],
+              additionalProperties: false
+            }
+        }; 
         const res = await fetch(`/api/openai/structuredChat`, {
             method: 'POST',
             headers: {
@@ -515,11 +568,13 @@ export const fetchStructuredResponse = async (
             },
             body: JSON.stringify({
                 temperature: 0.2,
-                messages,
+                messages: [
+                    systemPrompt,
+                    userPrompt,
+                ],
                 response_format: {
                     type: "json_schema",
-                    json_schema: schema, // JSON 스키마를 사용하여 구조화된 응답 요청
-                    strict: true
+                    json_schema: jsonSchema,
                 },
             }),
         })

@@ -30,6 +30,7 @@ import GradientText from '@/components/ui/text/GradientText'
 import { Typography } from 'antd'
 import { getCosineSimilarity } from '@/util/VectorUtils'
 import { settingsAtom } from '@/atoms/settingsAtom'
+import { IChatResponse } from '@/interfaces/common/IChatMessage'
 
 export default function Confirm() {
     return (
@@ -63,6 +64,7 @@ const ConfirmPage = () => {
     const [naverSearchItems, setNaverSearchItems] = useState<
         INaverSearchItem[]
     >([])
+    const [generateTableContents, setGenerateTableContents] = useState<IChatResponse | null>(null);
 
     // 키워드를 필터링한다. 중복제거 및 빈도순으로
     const filterKeywords = (
@@ -86,18 +88,10 @@ const ConfirmPage = () => {
     }
 
     const getTableContents = async (question: string) => {
-        const llmType = settings.selectedLLM;
-        const schema = {
-            type: "object",
-            properties: {
-                keywords: { 
-                    type: "array",
-                    items: { type: "string" }
-                }
-            },
-            required: ["keywords"]
-        };
-        return null;
+        const tableContents = await apiClient.fetchStructuredResponse(
+            question
+        );
+        return tableContents;
     }
 
     const getSearchKeywords = async (question: string) => {
@@ -283,10 +277,14 @@ const ConfirmPage = () => {
 
             setLoading(true)
 
+            let generateTableContents = null;
             // 목차 생성
-            setLoadingMessage('목차를 생성하고 있습니다..')
-            const generateTableContents = await getTableContents(question)
-            console.log(generateTableContents)
+            if(settings.selectedLLM == 'openai'){
+                setLoadingMessage('목차를 생성하고 있습니다..')
+                const generateTableContents = await getTableContents(question)
+                setGenerateTableContents(generateTableContents)
+                console.log(JSON.stringify(generateTableContents, null, 2))
+            }
 
             // 검색 키워드 추출
             setLoadingMessage('검색 키워드를 추출하고 있습니다..')
@@ -308,6 +306,7 @@ const ConfirmPage = () => {
             setDraftData((prevDraftData) => ({
                 ...prevDraftData,
                 naverSearchItems: rerankedSearchItems,
+                tableContents: generateTableContents,
             }))
 
             selectAllSearchedItems(rerankedSearchItems)
@@ -681,6 +680,46 @@ const ConfirmPage = () => {
                     </Button>,
                 ]}
             >
+                {/* 목차 내용 표시 */}
+                {generateTableContents && generateTableContents.data && (
+                <div className="flex flex-col gap-4">
+                    <Typography.Text strong style={{ fontSize: '16px' }}>
+                        📄 보고서로 작성될 목차에요
+                    </Typography.Text>
+                    
+                    <div className="flex flex-col gap-2">
+                    {['title', 'introduction', 'body1', 'body2', 'body3', 'body4', 'body5', 'conclusion'].map((section, idx) => (
+                        <div key={idx} className="flex items-center">
+                        <span className="text-[14px] font-bold w-24">
+                            {section === 'title'
+                            ? '제목'
+                            : section === 'introduction'
+                            ? '서론'
+                            : section === 'conclusion'
+                            ? '결론'
+                            : `본론 ${idx - 1}`}
+                        </span>
+                        <SizedBox width={12} />
+                        <Input
+                            value={JSON.parse(generateTableContents.data).tableContents[0][section]}
+                            onChange={(e) => {
+                            const updatedContent = { ...JSON.parse(generateTableContents.data) };
+                            updatedContent.tableContents[0][section] = e.target.value;
+                            setGenerateTableContents({
+                                ...generateTableContents,
+                                data: JSON.stringify(updatedContent),
+                            });
+                            }}
+                            className="w-full text-[14px]"
+                            placeholder={`내용을 입력하세요`}
+                        />
+                        </div>
+                    ))}
+                    </div>
+                </div>
+                )}
+
+
                 <span>보고서 생성은 약 15초 정도 소요됩니다.</span>
             </Modal>
 
