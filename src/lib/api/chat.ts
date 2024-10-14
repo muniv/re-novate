@@ -100,15 +100,19 @@ export const fetchReportMarkdown = async (
     question: string,
     context: string,
     imageUrl?: string,
+    tableContents?: string,
     llmType: LLMType = LLMType.openai
 ): Promise<IChatResponse> => {
     try {
+        console.log("tableContents:"+tableContents)
+        console.log("llmType:"+llmType)
         let prompt = getPrompt(
             LLMTasks.generateReport,
             question,
             context,
             undefined,
-            imageUrl
+            imageUrl,
+            tableContents,
         )
 
         if (llmType === LLMType.solar) {

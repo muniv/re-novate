@@ -14,5 +14,6 @@ export const draftDataAtom = atom<IDraftData>({
         docContents: [],
         naverSearchItems: [],
         useDalle: false,
+        tableContents: '',
     },
 })

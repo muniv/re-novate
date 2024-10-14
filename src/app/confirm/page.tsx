@@ -306,7 +306,6 @@ const ConfirmPage = () => {
             setDraftData((prevDraftData) => ({
                 ...prevDraftData,
                 naverSearchItems: rerankedSearchItems,
-                tableContents: generateTableContents,
             }))
 
             selectAllSearchedItems(rerankedSearchItems)
@@ -374,6 +373,21 @@ const ConfirmPage = () => {
                 selectedSearchItems.has(index)
             )
 
+        // 목차 내용을 JSON 형태로 파싱해서 저장
+        let parsedTableContents = null;
+        if (generateTableContents) {
+            try {
+                const parsedData = JSON.parse(generateTableContents.data);
+                // tableContents 객체를 바로 할당 (JSON.stringify 제거)
+                parsedTableContents = parsedData.tableContents && parsedData.tableContents.length > 0 ? parsedData.tableContents[0] : null;
+            } catch (error) {
+                console.error("Error parsing JSON for tableContents:", error);
+                parsedTableContents = null;
+            }
+        }
+
+        console.log(parsedTableContents)
+
         // 필터링된 데이터를 atom상에 넣는다.
         setDraftData((prevDraftData) => ({
             ...prevDraftData,
@@ -382,6 +396,7 @@ const ConfirmPage = () => {
             docContents: filteredDocContents,
             urlContents: filteredUrlContents,
             naverSearchItems: filteredNaverContents,
+            tableContents: parsedTableContents,
         }))
 
         router.push(appRoutes.generate)
@@ -709,6 +724,10 @@ const ConfirmPage = () => {
                                 ...generateTableContents,
                                 data: JSON.stringify(updatedContent),
                             });
+                            setDraftData((prevDraftData) => ({
+                                ...prevDraftData,
+                                tableContents: JSON.stringify(updatedContent),
+                            }))
                             }}
                             className="w-full text-[14px]"
                             placeholder={`내용을 입력하세요`}

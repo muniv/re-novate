@@ -158,7 +158,8 @@ function GenerateContent() {
     const makeMarkdownReport = async (
         question: string,
         context: string,
-        imageUrl?: string
+        imageUrl?: string,
+        tableContents?: string,
     ) => {
         console.log(`[makeMarkdownReport] imageUrl : ${imageUrl}`)
         const llmType = settings.selectedLLM
@@ -171,7 +172,8 @@ function GenerateContent() {
             question,
             context,
             imageUrl,
-            llmType
+            tableContents,
+            llmType,
         )
     }
 
@@ -319,6 +321,7 @@ function GenerateContent() {
             const question = draftData.question ?? ''
             let keywords = draftData.keywords ?? ''
             let imageUrl = undefined
+            const tableContents = draftData.tableContents ?? ''
 
             // 달리가 활성화 되어있는 경우에만 생성한다.
             if (draftData.useDalle) {
@@ -384,7 +387,8 @@ function GenerateContent() {
             const reportMarkdown = await makeMarkdownReport(
                 question,
                 reportContext,
-                imageUrl
+                imageUrl,
+                tableContents,
             )
             setMarkdown(reportMarkdown.data)
         } catch (e) {

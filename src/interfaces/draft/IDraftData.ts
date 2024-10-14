@@ -11,5 +11,6 @@ export interface IDraftData {
     docFiles: File[] // 첨부한 파일들
     docContents: string[] // 첨부한 파일 내용들
     naverSearchItems: INaverSearchItem[] // 네이버 검색결과
-    useDalle?: boolean
+    useDalle?: boolean,
+    tableContents?: string,
 }

@@ -5,8 +5,32 @@ export const getPrompt = (
     question: string,
     context?: string,
     selectedContextPiecce?: string, //컨텍스트 내용 중 선택된 부분
-    imageUrl?: string
+    imageUrl?: string,
+    tableContents?: string,
 ) => {
+    // tableContents를 JSON 객체로 변환
+    let parsedTableContents = null
+    
+    if (tableContents) {
+        console.log("Original tableContents:", tableContents);
+        
+        // `tableContents`가 객체인지 문자열인지 확인
+        if (typeof tableContents === 'string') {
+            try {
+                parsedTableContents = JSON.parse(tableContents);
+                console.log("Parsed tableContents:", parsedTableContents);
+            } catch (error) {
+                console.error("Invalid JSON format for tableContents:", error);
+                parsedTableContents = null; // 예외 발생 시 null로 설정
+            }
+        } else {
+            // 이미 JSON 객체인 경우
+            parsedTableContents = tableContents;
+            console.log("tableContents is already parsed:", parsedTableContents);
+        }
+    }
+    
+
     let prompt = ''
 
     // 일반 질문
@@ -49,6 +73,21 @@ export const getPrompt = (
             '\n' +
             '### 참고자료 (Context):\n' +
             `${context}\n\n`
+
+        // tableContents가 있을 경우 각 섹션의 내용을 명확히 제시
+        if (parsedTableContents) {
+            prompt += '### 섹션 안내 (Sections Guide):\n'
+            prompt += `- 제목: ${parsedTableContents.title}\n`
+            prompt += `- 서론: ${parsedTableContents.introduction}\n`
+
+            if (parsedTableContents.body1) prompt += `- 본론1: ${parsedTableContents.body1}\n`
+            if (parsedTableContents.body2) prompt += `- 본론2: ${parsedTableContents.body2}\n`
+            if (parsedTableContents.body3) prompt += `- 본론3: ${parsedTableContents.body3}\n`
+            if (parsedTableContents.body4) prompt += `- 본론4: ${parsedTableContents.body4}\n`
+            if (parsedTableContents.body5) prompt += `- 본론5: ${parsedTableContents.body5}\n`
+
+            prompt += `- 결론: ${parsedTableContents.conclusion}\n\n`
+        }
 
         // 유저가 이미지 url을 줬을 경우 프롬프트에 추가
         if (imageUrl) {
