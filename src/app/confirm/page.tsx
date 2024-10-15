@@ -64,7 +64,8 @@ const ConfirmPage = () => {
     const [naverSearchItems, setNaverSearchItems] = useState<
         INaverSearchItem[]
     >([])
-    const [generateTableContents, setGenerateTableContents] = useState<IChatResponse | null>(null);
+    const [generateTableContents, setGenerateTableContents] =
+        useState<IChatResponse | null>(null)
 
     // 키워드를 필터링한다. 중복제거 및 빈도순으로
     const filterKeywords = (
@@ -88,10 +89,8 @@ const ConfirmPage = () => {
     }
 
     const getTableContents = async (question: string) => {
-        const tableContents = await apiClient.fetchStructuredResponse(
-            question
-        );
-        return tableContents;
+        const tableContents = await apiClient.fetchStructuredResponse(question)
+        return tableContents
     }
 
     const getSearchKeywords = async (question: string) => {
@@ -278,7 +277,7 @@ const ConfirmPage = () => {
             setLoading(true)
 
             // 목차 생성
-            if(settings.selectedLLM == 'openai'){
+            if (settings.selectedLLM == 'openai') {
                 setLoadingMessage('목차를 생성하고 있습니다..')
                 const generateTableContents = await getTableContents(question)
                 setGenerateTableContents(generateTableContents)
@@ -373,15 +372,19 @@ const ConfirmPage = () => {
             )
 
         // 목차 내용을 JSON 형태로 파싱해서 저장
-        let parsedTableContents = null;
+        let parsedTableContents = null
         if (generateTableContents) {
             try {
-                const parsedData = JSON.parse(generateTableContents.data);
+                const parsedData = JSON.parse(generateTableContents.data)
                 // tableContents 객체를 바로 할당 (JSON.stringify 제거)
-                parsedTableContents = parsedData.tableContents && parsedData.tableContents.length > 0 ? parsedData.tableContents[0] : null;
+                parsedTableContents =
+                    parsedData.tableContents &&
+                    parsedData.tableContents.length > 0
+                        ? parsedData.tableContents[0]
+                        : null
             } catch (error) {
-                console.error("Error parsing JSON for tableContents:", error);
-                parsedTableContents = null;
+                console.error('Error parsing JSON for tableContents:', error)
+                parsedTableContents = null
             }
         }
 
@@ -696,47 +699,68 @@ const ConfirmPage = () => {
             >
                 {/* 목차 내용 표시 */}
                 {generateTableContents && generateTableContents.data && (
-                <div className="flex flex-col gap-4">
-                    <Typography.Text strong style={{ fontSize: '16px' }}>
-                        📄 보고서로 작성될 목차에요
-                    </Typography.Text>
-                    
-                    <div className="flex flex-col gap-2">
-                    {['title', 'introduction', 'body1', 'body2', 'body3', 'body4', 'body5', 'conclusion'].map((section, idx) => (
-                        <div key={idx} className="flex items-center">
-                        <span className="text-[14px] font-bold w-24">
-                            {section === 'title'
-                            ? '제목'
-                            : section === 'introduction'
-                            ? '서론'
-                            : section === 'conclusion'
-                            ? '결론'
-                            : `본론 ${idx - 1}`}
-                        </span>
-                        <SizedBox width={12} />
-                        <Input
-                            value={JSON.parse(generateTableContents.data).tableContents[0][section]}
-                            onChange={(e) => {
-                            const updatedContent = { ...JSON.parse(generateTableContents.data) };
-                            updatedContent.tableContents[0][section] = e.target.value;
-                            setGenerateTableContents({
-                                ...generateTableContents,
-                                data: JSON.stringify(updatedContent),
-                            });
-                            setDraftData((prevDraftData) => ({
-                                ...prevDraftData,
-                                tableContents: JSON.stringify(updatedContent),
-                            }))
-                            }}
-                            className="w-full text-[14px]"
-                            placeholder={`내용을 입력하세요`}
-                        />
-                        </div>
-                    ))}
-                    </div>
-                </div>
-                )}
+                    <div className="flex flex-col gap-4">
+                        <Typography.Text strong style={{ fontSize: '16px' }}>
+                            📄 보고서로 작성될 목차에요
+                        </Typography.Text>
 
+                        <div className="flex flex-col gap-2">
+                            {[
+                                'title',
+                                'introduction',
+                                'body1',
+                                'body2',
+                                'body3',
+                                'conclusion',
+                            ].map((section, idx) => (
+                                <div key={idx} className="flex items-center">
+                                    <span className="text-[14px] font-bold w-24">
+                                        {section === 'title'
+                                            ? '제목'
+                                            : section === 'introduction'
+                                              ? '서론'
+                                              : section === 'conclusion'
+                                                ? '결론'
+                                                : `본론 ${idx - 1}`}
+                                    </span>
+                                    <SizedBox width={12} />
+                                    <Input
+                                        value={
+                                            JSON.parse(
+                                                generateTableContents.data
+                                            ).tableContents[0][section]
+                                        }
+                                        onChange={(e) => {
+                                            const updatedContent = {
+                                                ...JSON.parse(
+                                                    generateTableContents.data
+                                                ),
+                                            }
+                                            updatedContent.tableContents[0][
+                                                section
+                                            ] = e.target.value
+                                            setGenerateTableContents({
+                                                ...generateTableContents,
+                                                data: JSON.stringify(
+                                                    updatedContent
+                                                ),
+                                            })
+                                            setDraftData((prevDraftData) => ({
+                                                ...prevDraftData,
+                                                tableContents:
+                                                    JSON.stringify(
+                                                        updatedContent
+                                                    ),
+                                            }))
+                                        }}
+                                        className="w-full text-[14px]"
+                                        placeholder={`내용을 입력하세요`}
+                                    />
+                                </div>
+                            ))}
+                        </div>
+                    </div>
+                )}
 
                 <span>보고서 생성은 약 15초 정도 소요됩니다.</span>
             </Modal>

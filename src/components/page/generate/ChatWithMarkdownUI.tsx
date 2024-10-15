@@ -63,6 +63,7 @@ const ChatWithMarkdownUI: React.FC<Props> = ({
     const markdownContentRef = useRef<HTMLDivElement>(null)
 
     const toggleSentenceSelection = (sentence: string) => {
+        console.log(sentence)
         setSelectedSentences((prev) => {
             const newSet = new Set(prev)
             if (newSet.has(sentence)) {

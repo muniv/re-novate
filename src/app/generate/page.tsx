@@ -119,7 +119,7 @@ function GenerateContent() {
                 newsContext += `### 뉴스 아이템 ${index + 1}\n`
                 newsContext += `- 제목 : ${newsSearchItem.title}`
                 newsContext += `- 내용 : ${newsSearchItem.description}`
-                newsContext += `- 링크 : ${newsSearchItem.link}`
+                newsContext += `- 링크 : ${decodeURI(newsSearchItem.link)}`
                 newsContext += `\n\n`
             })
 
@@ -129,7 +129,7 @@ function GenerateContent() {
                 blogContext += `### 블로그 아이템 ${index + 1}\n`
                 blogContext += `- 제목 : ${blogSearchItem.title}`
                 blogContext += `- 내용 : ${blogSearchItem.description}`
-                blogContext += `- 링크 : ${blogSearchItem.link}`
+                blogContext += `- 링크 : ${decodeURI(blogSearchItem.link)}`
                 blogContext += `\n\n`
             })
 
@@ -139,7 +139,7 @@ function GenerateContent() {
                 webSearchContext += `### 웹문서 아이템 ${index + 1}\n`
                 webSearchContext += `- 제목 : ${webSearchItem.title}`
                 webSearchContext += `- 내용 : ${webSearchItem.description}`
-                webSearchContext += `- 링크 : ${webSearchItem.link}`
+                webSearchContext += `- 링크 : ${decodeURI(webSearchItem.link)}`
                 webSearchContext += `\n\n`
             })
 
@@ -159,7 +159,7 @@ function GenerateContent() {
         question: string,
         context: string,
         imageUrl?: string,
-        tableContents?: string,
+        tableContents?: string
     ) => {
         console.log(`[makeMarkdownReport] imageUrl : ${imageUrl}`)
         const llmType = settings.selectedLLM
@@ -173,7 +173,7 @@ function GenerateContent() {
             context,
             imageUrl,
             tableContents,
-            llmType,
+            llmType
         )
     }
 
@@ -344,7 +344,14 @@ function GenerateContent() {
             const contextInNaverSearch = draftData.naverSearchItems
                 .map(
                     (naverSearchItem, index) =>
-                        `## 검색결과 ${index + 1}:\n- 제목 : ${naverSearchItem.title}\n- 내용 : ${naverSearchItem.description}\n- 링크 : ${naverSearchItem.link}\n`
+                        `## 검색결과 ${index + 1}:\n- 제목 : ${naverSearchItem.title}\n- 내용 : ${naverSearchItem.description}\n- 링크 : ${decodeURI(naverSearchItem.link)}\n`
+                )
+                .join('\n')
+
+            const naverSearchLinkText = draftData.naverSearchItems
+                .map(
+                    (naverSearchItem, index) =>
+                        `- <a href="${naverSearchItem.link}" target="_blank">${naverSearchItem.title}</a>\n`
                 )
                 .join('\n')
 
@@ -388,9 +395,14 @@ function GenerateContent() {
                 question,
                 reportContext,
                 imageUrl,
-                tableContents,
+                tableContents
             )
-            setMarkdown(reportMarkdown.data)
+
+            setMarkdown(
+                reportMarkdown.data +
+                    '\n\n### 참고 자료\n' +
+                    naverSearchLinkText
+            )
         } catch (e) {
             alert(`에러가 발생하여, 메인화면으로 이동합니다.\n\n${e}`)
             router.push(appRoutes.index)

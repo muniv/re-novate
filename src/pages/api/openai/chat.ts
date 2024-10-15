@@ -34,7 +34,7 @@ export default async function handler(
                     'Content-Type': 'application/json',
                 },
                 body: JSON.stringify({
-                    model: model || 'gpt-4o-mini', // default model
+                    model: 'gpt-4o-mini', // default model
                     messages: messages || [
                         {
                             role: 'system',
