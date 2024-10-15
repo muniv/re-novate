@@ -24,7 +24,9 @@ const SentenceComponent: React.FC<SentenceComponentProps> = ({
                 textContent = children.toString()
             }
 
-            onToggleSelect(textContent)
+            if (textContent.length > 0) {
+                onToggleSelect(textContent)
+            }
         }
     }
 
