@@ -174,6 +174,26 @@ const ConfirmPage = () => {
         }
     }
 
+    const getGroundnessOnSearchResults = async (
+        question: string,
+        naverSearchResults: INaverSearchItem[]
+    ): Promise<INaverSearchItem[]> => {
+        const updatedNaverSearchResults: INaverSearchItem[] = await Promise.all(
+            naverSearchResults.map(async (naverSearchResult, index) => {
+                const embeddingResponse = await apiClient.fetchGroundness(
+                    naverSearchResult.description,
+                    question
+                )
+                return {
+                    ...naverSearchResult,
+                    index: index,
+                    isGrounded: embeddingResponse.data !== 'notGrounded',
+                }
+            })
+        )
+        return updatedNaverSearchResults
+    }
+
     const getEmbeddingScoresOnSearchResults = async (
         naverSearchResults: INaverSearchItem[]
     ) => {
@@ -189,6 +209,7 @@ const ConfirmPage = () => {
 
                 return {
                     ...naverSearchResult,
+                    index: index,
                     embeddingScore: embeddingData?.embedding,
                 }
             })
@@ -198,21 +219,27 @@ const ConfirmPage = () => {
     const rerankOnNaverSearchResults = async (
         question: string,
         naverSearchResults: INaverSearchItem[],
-        threshold: number = 0.3 // Add threshold parameter
+        threshold: number = 0.3, // 코사인 유사도 임계값
+        cosineWeight: number = 0.5, // 코사인 유사도 가중치
+        groundedWeight: number = 0.5 // isGrounded 가중치
     ) => {
-        // Fetch question embedding and search result embeddings concurrently
-        const [questionEmbeddingScore, embeddedNaverSearchItems] =
-            await Promise.all([
-                apiClient.fetchEmbeddingScores([question]), // Fetch embedding score for the question
-                getEmbeddingScoresOnSearchResults(naverSearchResults), // Fetch embedding scores for the search results
-            ])
+        // 질문의 임베딩 점수와 검색 결과들의 임베딩, 그리고 검색 결과의 isGrounded 값을 동시에 가져옴
+        const [
+            questionEmbeddingScore,
+            embeddedNaverSearchItems,
+            groundCheckedResults,
+        ] = await Promise.all([
+            apiClient.fetchEmbeddingScores([question]), // 질문의 임베딩 점수를 가져옴
+            getEmbeddingScoresOnSearchResults(naverSearchResults), // 검색 결과들의 임베딩 점수를 가져옴
+            getGroundnessOnSearchResults(question, naverSearchResults), // 검색 결과들의 isGrounded 여부를 가져옴
+        ])
 
         const questionEmbedding = questionEmbeddingScore.data[0].embedding
-        const searchResultEmbeddings = embeddedNaverSearchItems.map(
-            (item) => item.embeddingScore ?? []
-        )
+        const searchResultEmbeddings = embeddedNaverSearchItems.map((item) => {
+            return item.embeddingScore ?? []
+        })
 
-        // Compute cosine similarities for all search results
+        // 모든 검색 결과에 대해 코사인 유사도를 계산
         const cosineSimilarities = await Promise.all(
             searchResultEmbeddings.map((embedding) =>
                 Promise.resolve(
@@ -221,20 +248,31 @@ const ConfirmPage = () => {
             )
         )
 
-        // Attach cosine similarity to each search result item
-        const rankedResults = embeddedNaverSearchItems.map((item, index) => ({
-            ...item,
-            cosineSimilarity: cosineSimilarities[index], // Add cosine similarity to each item
-        }))
+        // 코사인 유사도와 isGrounded 값을 결합하여 가중치 점수 계산
+        const rankedResults = groundCheckedResults.map((item, index) => {
+            const cosineSimilarity = cosineSimilarities[index]
+            const isGrounded = item.isGrounded ? 1 : 0 // isGrounded가 true면 1, false면 0
 
-        // Filter results based on the cosine similarity threshold
+            // 가중치 점수 계산 (코사인 유사도 * 가중치 + isGrounded * 가중치)
+            const weightedScore =
+                cosineWeight * cosineSimilarity + groundedWeight * isGrounded
+
+            return {
+                ...item,
+                cosineSimilarity,
+                isGrounded,
+                weightedScore, // 각 항목에 가중치 점수를 추가
+            }
+        })
+
+        // 코사인 유사도 임계값을 기준으로 결과 필터링
         const filteredResults = rankedResults.filter(
             (item) => item.cosineSimilarity >= threshold
         )
 
-        // Sort search results by cosine similarity in descending order
+        // 가중치 점수를 기준으로 결과를 내림차순 정렬
         const sortedResults = filteredResults.sort(
-            (a, b) => b.cosineSimilarity - a.cosineSimilarity
+            (a, b) => b.weightedScore - a.weightedScore
         )
 
         return sortedResults

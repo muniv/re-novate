@@ -1,10 +1,12 @@
 // Interface for web search response items
 export interface INaverSearchItem {
+    index: number
     type: string
     title: string
     link: string
     description: string
     embeddingScore?: number[]
+    isGrounded?: boolean
 }
 
 export type IWebSearchItem = INaverSearchItem
