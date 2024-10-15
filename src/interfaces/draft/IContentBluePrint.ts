@@ -1,5 +1,3 @@
-export interface ITableContent {}
-
 export interface IContentBluePrint {
     title: string
     introduction: string
