@@ -114,34 +114,29 @@ const ChatMessageInput: React.FC<MessageInputProps> = ({
                         <div className={'flex-1'} />
 
                         {/* 글자수 */}
-                        <div className={'flex items-center mr-[8px]'}>
+                        <div className={'flex items-end h-[28px] mr-[8px]'}>
                             <span className={'text-[12px]'}>
                                 {question.length}/{1000}
                             </span>
                         </div>
 
                         {/* 보내기 버튼과 세부 설정 문구 */}
-                        <div className="flex flex-col items-center">
-                            <Tooltip title={'보고서 생성 세부 설정'}>
-                                <button
-                                    onClick={handleGenOption}
-                                    className={`flex items-center justify-center w-[32px] h-[32px] rounded-lg cursor-pointer duration-100`}
-                                >
-                                    <SettingsIcon className="h-[24px] w-[24px] font-light text-gray-500" />
-                                </button>
-                            </Tooltip>
-                            {/*<div className="flex flex-col items-center text-gray-500 text-[10px] mt-1">*/}
-                            {/*    <span>보고서 생성</span>*/}
-                            {/*    <span>세부 설정</span>*/}
-                            {/*</div>{' '}*/}
-                            {/* 줄바꿈 추가 */}
-                        </div>
+                        {/*<div className="flex flex-col items-center">*/}
+                        {/*    <Tooltip title={'보고서 생성 세부 설정'}>*/}
+                        {/*        <button*/}
+                        {/*            onClick={handleGenOption}*/}
+                        {/*            className={`flex items-center justify-center w-[32px] h-[32px] rounded-lg cursor-pointer duration-100`}*/}
+                        {/*        >*/}
+                        {/*            <SettingsIcon className="h-[24px] w-[24px] font-light text-gray-500" />*/}
+                        {/*        </button>*/}
+                        {/*    </Tooltip>*/}
+                        {/*</div>*/}
 
-                        <SizedBox width={8} />
+                        <SizedBox width={4} />
 
                         <Tooltip title={'초안 생성 시작'}>
                             <button
-                                onClick={handleSubmit}
+                                onClick={handleGenOption}
                                 aria-label="메시지 전송"
                                 className={`flex items-center justify-center w-[32px] h-[32px] rounded-lg bg-violet-700 cursor-pointer hover:bg-violet-500 transition-colors duration-100`}
                             >

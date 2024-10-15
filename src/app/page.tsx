@@ -66,6 +66,7 @@ export default function MainPage() {
     }
 
     const onGoToNextPageButtonClicked = () => {
+        setGenOptionModalOpen(false)
         setDraftData((prevDraftData) => ({
             ...prevDraftData,
             question: question,
@@ -176,6 +177,7 @@ export default function MainPage() {
                 modalOpen={genOptionModalOpen}
                 question={question}
                 setQuestion={setQuestion}
+                onConfirmButtonClicked={onGoToNextPageButtonClicked}
                 files={attachedFiles}
                 setFiles={setAttachedFiles}
                 urls={urls}

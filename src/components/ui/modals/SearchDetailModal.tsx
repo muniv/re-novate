@@ -26,6 +26,7 @@ interface SearchDetailModalProps {
     setModalOpen: (open: boolean) => void
     question?: string
     setQuestion: (question: string) => void
+    onConfirmButtonClicked?: () => void
     files: File[]
     setFiles: (files: File[]) => void
     urls: string[]
@@ -39,6 +40,7 @@ const SearchDetailModal: React.FC<SearchDetailModalProps> = ({
     setModalOpen,
     question,
     setQuestion,
+    onConfirmButtonClicked,
     files,
     setFiles,
     urls,
@@ -120,9 +122,7 @@ const SearchDetailModal: React.FC<SearchDetailModalProps> = ({
                     paddingTop: '48px',
                     paddingBottom: '48px',
                 }}
-                onOk={() => {
-                    setModalOpen(false)
-                }}
+                onOk={onConfirmButtonClicked}
                 onCancel={() => setModalOpen(false)}
             >
                 <div className={'flex flex-col py-[12px] gap-[36px]'}>
