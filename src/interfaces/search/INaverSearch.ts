@@ -1,6 +1,6 @@
 // Interface for web search response items
 export interface INaverSearchItem {
-    index: number
+    index?: number
     type: string
     title: string
     link: string

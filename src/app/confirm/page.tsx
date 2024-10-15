@@ -222,7 +222,7 @@ const ConfirmPage = () => {
         threshold: number = 0.3, // 코사인 유사도 임계값
         cosineWeight: number = 0.5, // 코사인 유사도 가중치
         groundedWeight: number = 0.5 // isGrounded 가중치
-    ) => {
+    ): Promise<INaverSearchItem[]> => {
         // 질문의 임베딩 점수와 검색 결과들의 임베딩, 그리고 검색 결과의 isGrounded 값을 동시에 가져옴
         const [
             questionEmbeddingScore,
@@ -251,16 +251,16 @@ const ConfirmPage = () => {
         // 코사인 유사도와 isGrounded 값을 결합하여 가중치 점수 계산
         const rankedResults = groundCheckedResults.map((item, index) => {
             const cosineSimilarity = cosineSimilarities[index]
-            const isGrounded = item.isGrounded ? 1 : 0 // isGrounded가 true면 1, false면 0
-
+            const isGrounded = item.isGrounded ? true : false // isGrounded를 boolean으로 변환
             // 가중치 점수 계산 (코사인 유사도 * 가중치 + isGrounded * 가중치)
             const weightedScore =
-                cosineWeight * cosineSimilarity + groundedWeight * isGrounded
+                cosineWeight * cosineSimilarity +
+                groundedWeight * (isGrounded ? 1 : 0)
 
             return {
                 ...item,
                 cosineSimilarity,
-                isGrounded,
+                isGrounded, // boolean 타입으로 변환
                 weightedScore, // 각 항목에 가중치 점수를 추가
             }
         })
@@ -271,9 +271,13 @@ const ConfirmPage = () => {
         )
 
         // 가중치 점수를 기준으로 결과를 내림차순 정렬
-        const sortedResults = filteredResults.sort(
-            (a, b) => b.weightedScore - a.weightedScore
-        )
+        const sortedResults = filteredResults
+            .sort((a, b) => b.weightedScore - a.weightedScore)
+            .map((item) => {
+                // INaverSearchItem에 맞도록 추가 속성 제거
+                const { cosineSimilarity, weightedScore, ...rest } = item
+                return rest as INaverSearchItem
+            })
 
         return sortedResults
     }
