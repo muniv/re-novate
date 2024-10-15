@@ -277,7 +277,6 @@ const ConfirmPage = () => {
 
             setLoading(true)
 
-            let generateTableContents = null;
             // 목차 생성
             if(settings.selectedLLM == 'openai'){
                 setLoadingMessage('목차를 생성하고 있습니다..')
