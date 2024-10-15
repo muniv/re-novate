@@ -67,6 +67,11 @@ export const getPrompt = (
         prompt =
             '### 지시사항 (Instruct): \n' +
             '아래의 질문과 참고자료를 바탕으로, 기승전결이 있는 보고서를 작성해주세요. 보고서는 **서론**, 번호가 매겨진 **본론** (1.,1-1, 1-2, 1-3,..., 2.,2-1,2-2, ..., 3., 3-1,3-2,... 등), 그리고 **결론**으로 구성되며, 각 섹션은 적절한 마크다운 헤딩(`#`, `##`, `###`)을 사용하여 구분해주세요. 충분히 길게 작성해주세요. 내용은 바로 보고가 가능하도록 깔끔하고 명확하게 작성해주세요.\n' +
+            '문장이 특정 근거를 참고했다면 본문에는 번호로 표시하고, 맨 마지막에 참고자료를 번호와 이름 링크로 명시해주세요. 예시: "내용 [1]"\n' +
+            '참고자료 예시:\n' +
+            '[<span style=\'color: purple;\'>1</span>] <a href="https://www.example.com" target="_blank" rel="noopener noreferrer" style="color: purple; text-decoration: underline;">Example Source</a>\n' +
+            '[<span style=\'color: purple;\'>2</span>] <a href="https://www.anotherexample.com" target="_blank" rel="noopener noreferrer" style="color: purple; text-decoration: underline;">Another Source</a>\n' +
+            '[<span style=\'color: purple;\'>3</span>] 파일: 오리농장_사육_방법.pdf\n' +
             '\n' +
             '### 질문 (Question): \n' +
             `${question}\n` +
