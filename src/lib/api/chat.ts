@@ -576,7 +576,7 @@ export const fetchStructuredResponse = async (
                 temperature: 0.2,
                 messages: [systemPrompt, userPrompt],
                 response_format: {
-                    type: 'json_schema',
+                    type: 'json_object',
                     json_schema: jsonSchema,
                 },
             }),

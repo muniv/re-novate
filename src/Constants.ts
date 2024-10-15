@@ -18,6 +18,7 @@ export enum LLMTasks {
     recommendKeywordsForImage, //키워드 추천
     reArrangeQuestion, //질문 다듬기
     reArrangeContext, //질문과 관련있는 컨텍스트만 남기기
+    generateOutlineText, //키워드 추천
     email,
 }
 

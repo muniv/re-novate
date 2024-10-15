@@ -3,34 +3,26 @@
 import { HorizontalNavbar } from '@/components/ui/navbar/HorizontalNavbar'
 import { Suspense, useEffect, useState } from 'react'
 import LoadingShimmer from '@/components/ui/loading/LoadingShimmer'
-import { appRoutes } from '@/Constants'
-import { useRouter, useSearchParams } from 'next/navigation'
+import { appRoutes, LLMTasks } from '@/Constants'
+import { useRouter } from 'next/navigation'
 import apiClient from '@/lib/apiClient'
-import {
-    IBlogSearchItem,
-    INaverSearchItem,
-    INewsSearchItem,
-    IWebSearchItem,
-} from '@/interfaces/search/INaverSearch'
+import { INaverSearchItem } from '@/interfaces/search/INaverSearch'
 import { useRecoilState } from 'recoil'
 import { draftDataAtom } from '@/atoms/draftDataAtom'
-import { IChatExample } from '@/interfaces/common/IChatExample'
-import NaverSearchItemComponent from '@/components/page/confirm/NaverSearchItemComponent'
 import NaverSearchItemList from '@/components/page/confirm/NaverSearchItemList'
 import { removeHtmlTags } from '@/util/TextUtils'
 import SizedBox from '@/components/ui/box/SizedBox'
-import { Alert, Button, Input, message, Modal, Popconfirm } from 'antd'
+import { Button, Input, message, Modal, Typography } from 'antd'
 import UrlContentItemList from '@/components/page/confirm/UrlContentItemList'
 import { fetchDataFromUrls } from '@/util/WebUtil'
-import urlContentItemComponent from '@/components/page/confirm/UrlContentItemComponent'
 import OcrContentItemList from '@/components/page/confirm/OcrContentItemList'
-import { ExclamationCircleOutlined } from '@ant-design/icons'
 import { AlertCircleIcon } from 'lucide-react'
 import GradientText from '@/components/ui/text/GradientText'
-import { Typography } from 'antd'
 import { getCosineSimilarity } from '@/util/VectorUtils'
 import { settingsAtom } from '@/atoms/settingsAtom'
-import { IChatResponse } from '@/interfaces/common/IChatMessage'
+import { IChatMessage, IChatResponse } from '@/interfaces/common/IChatMessage'
+import { getPrompt } from '@/util/PromptUtils'
+import { IContentBluePrint } from '@/interfaces/draft/IContentBluePrint'
 
 export default function Confirm() {
     return (
@@ -88,9 +80,35 @@ const ConfirmPage = () => {
         return sortedUniqueWords.slice(0, maxCount).join(' ')
     }
 
-    const getTableContents = async (question: string) => {
-        const tableContents = await apiClient.fetchStructuredResponse(question)
-        return tableContents
+    const getTableContents = async (
+        question: string
+    ): Promise<IChatResponse> => {
+        const prompt = getPrompt(LLMTasks.generateOutlineText, question)
+        const chatMessage: IChatMessage = {
+            content: prompt,
+            role: 'user',
+            bubbleId: 11111,
+        }
+
+        const response = await apiClient.fetchChatResponse([chatMessage])
+        const responseItemList = response.data.split('||')
+
+        return {
+            data: JSON.stringify({
+                tableContents: [
+                    {
+                        title: responseItemList[0],
+                        introduction: responseItemList[1],
+                        body1: responseItemList[2],
+                        body2: responseItemList[3],
+                        body3: responseItemList[4],
+                        conclusion: responseItemList[5],
+                    },
+                ],
+            }),
+            error: '',
+            success: true,
+        }
     }
 
     const getSearchKeywords = async (question: string) => {
@@ -263,6 +281,24 @@ const ConfirmPage = () => {
         setIsAllSearchItemsSelected(true)
     }
 
+    function getAllKeys(obj: any, parentKey = ''): string[] {
+        let keys: string[] = []
+
+        // 객체인지 배열인지에 상관없이 처리
+        if (typeof obj === 'object' && obj !== null) {
+            for (const key in obj) {
+                // 현재 key에 parentKey를 추가하여 중첩 구조 표현
+                const fullKey = parentKey ? `${parentKey}.${key}` : key
+                keys.push(fullKey)
+
+                // 재귀적으로 객체 내부의 키들을 처리
+                keys = keys.concat(getAllKeys(obj[key], fullKey))
+            }
+        }
+
+        return keys
+    }
+
     const initialize = async () => {
         const question = draftData.question ?? ''
         console.log(`question: ${question}`)
@@ -281,7 +317,6 @@ const ConfirmPage = () => {
                 setLoadingMessage('목차를 생성하고 있습니다..')
                 const generateTableContents = await getTableContents(question)
                 setGenerateTableContents(generateTableContents)
-                console.log(JSON.stringify(generateTableContents, null, 2))
             }
 
             // 검색 키워드 추출
@@ -700,9 +735,16 @@ const ConfirmPage = () => {
                 {/* 목차 내용 표시 */}
                 {generateTableContents && generateTableContents.data && (
                     <div className="flex flex-col gap-4">
-                        <Typography.Text strong style={{ fontSize: '16px' }}>
-                            📄 보고서로 작성될 목차에요
-                        </Typography.Text>
+                        <div className={'flex flex-col'}>
+                            <SizedBox height={8} />
+                            <Typography.Text
+                                className={''}
+                                strong
+                                style={{ fontSize: '16px' }}
+                            >
+                                📄 보고서로 작성될 목차에요
+                            </Typography.Text>
+                        </div>
 
                         <div className="flex flex-col gap-2">
                             {[
@@ -739,6 +781,7 @@ const ConfirmPage = () => {
                                             updatedContent.tableContents[0][
                                                 section
                                             ] = e.target.value
+
                                             setGenerateTableContents({
                                                 ...generateTableContents,
                                                 data: JSON.stringify(
@@ -762,7 +805,10 @@ const ConfirmPage = () => {
                     </div>
                 )}
 
-                <span>보고서 생성은 약 15초 정도 소요됩니다.</span>
+                <SizedBox height={12} />
+                <span className={'text-gray-400 mt-[24px]'}>
+                    보고서 생성은 약 15초 정도 소요됩니다.
+                </span>
             </Modal>
 
             {/* 생성 시작 버튼 */}
