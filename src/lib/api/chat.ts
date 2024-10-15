@@ -591,7 +591,7 @@ export const fetchStructuredResponse = async (
 
         return {
             success: data['success'],
-            data: data['data'], // 스키마에 맞는 응답 데이터를 반환
+            data: JSON.parse(JSON.stringify(data.data)), // 스키마에 맞는 응답 데이터를 반환
         }
     } catch (error) {
         console.error('Error fetching structured chat response:', error)
