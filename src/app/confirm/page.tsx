@@ -809,8 +809,8 @@ const ConfirmPage = () => {
             >
                 {/* 목차 내용 표시 */}
                 {generateTableContents && generateTableContents.data && (
-                    <div className="flex flex-col gap-4">
-                        <div className={'inline-flex items-center justify-center gap-2 whitespace-nowrap'}>
+                    <div className="flex flex-col gap-4 mt-4">
+                        <div className={'inline-flex items-center gap-2 whitespace-nowrap justify-start'}>
                             <SizedBox height={8} />
                             <Typography.Text
                                 className={''}
