@@ -23,6 +23,7 @@ import { settingsAtom } from '@/atoms/settingsAtom'
 import { IChatMessage, IChatResponse } from '@/interfaces/common/IChatMessage'
 import { getPrompt } from '@/util/PromptUtils'
 import { IContentBluePrint } from '@/interfaces/draft/IContentBluePrint'
+import AiGenButton from '@/components/ui/button/AiGenIcon'
 
 export default function Confirm() {
     return (
@@ -58,6 +59,8 @@ const ConfirmPage = () => {
     >([])
     const [generateTableContents, setGenerateTableContents] =
         useState<IChatResponse | null>(null)
+
+    const [isReGenTableContentLoading, setIsReGenTableContentLoading] = useState(false)
 
     // 키워드를 필터링한다. 중복제거 및 빈도순으로
     const filterKeywords = (
@@ -485,6 +488,36 @@ const ConfirmPage = () => {
         setVisibleConfirmModal(true)
     }
 
+    const reGenTableContent = async () => {
+        const question = draftData.question ?? ''
+        try {
+            setIsReGenTableContentLoading(true)
+            const generateTableContents = await getTableContents(question)
+    
+            // responseItemList에서 각 섹션에 맞게 데이터를 배치하고 JSON 문자열로 변환
+            const responseItemList = JSON.parse(generateTableContents.data).tableContents[0]
+            const tableContentsAsString = JSON.stringify({
+                title: responseItemList.title,
+                introduction: responseItemList.introduction,
+                body1: responseItemList.body1,
+                body2: responseItemList.body2,
+                body3: responseItemList.body3,
+                conclusion: responseItemList.conclusion,
+            })
+    
+            setDraftData((prevDraftData) => ({
+                ...prevDraftData,
+                tableContents: tableContentsAsString,
+            }))
+    
+            setGenerateTableContents(generateTableContents)
+        } finally {
+            setIsReGenTableContentLoading(false)
+            messageApi.success('목차가 다시 생성되었습니다!')
+        }
+    }
+    
+
     useEffect(() => {
         initialize()
     }, [])
@@ -777,7 +810,7 @@ const ConfirmPage = () => {
                 {/* 목차 내용 표시 */}
                 {generateTableContents && generateTableContents.data && (
                     <div className="flex flex-col gap-4">
-                        <div className={'flex flex-col'}>
+                        <div className={'inline-flex items-center justify-center gap-2 whitespace-nowrap'}>
                             <SizedBox height={8} />
                             <Typography.Text
                                 className={''}
@@ -786,6 +819,10 @@ const ConfirmPage = () => {
                             >
                                 📄 보고서로 작성될 목차에요
                             </Typography.Text>
+                            <AiGenButton
+                                onClick={reGenTableContent}
+                                isLoading={isReGenTableContentLoading}
+                            />
                         </div>
 
                         <div className="flex flex-col gap-2">
@@ -797,7 +834,7 @@ const ConfirmPage = () => {
                                 'body3',
                                 'conclusion',
                             ].map((section, idx) => (
-                                <div key={idx} className="flex items-center">
+                                <div key={idx} className="flex w-full items-center">
                                     <span className="text-[14px] font-bold w-24">
                                         {section === 'title'
                                             ? '제목'
@@ -838,7 +875,7 @@ const ConfirmPage = () => {
                                                     ),
                                             }))
                                         }}
-                                        className="w-full text-[14px]"
+                                        className="w-full text-[14px] mr-2"
                                         placeholder={`내용을 입력하세요`}
                                     />
                                 </div>
