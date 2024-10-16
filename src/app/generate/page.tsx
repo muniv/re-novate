@@ -344,7 +344,8 @@ function GenerateContent() {
             const contextInNaverSearch = draftData.naverSearchItems
                 .map(
                     (naverSearchItem, index) =>
-                        `## 검색결과 ${index + 1}:\n- 제목 : ${naverSearchItem.title}\n- 내용 : ${naverSearchItem.description}\n- 링크 : ${decodeURI(naverSearchItem.link)}\n`
+                        // `## 검색결과 ${index + 1}:\n- 제목 : ${naverSearchItem.title}\n- 내용 : ${naverSearchItem.description}\n- 링크 : ${decodeURI(naverSearchItem.link)}\n`
+                        `## 검색결과 ${index + 1}:\n- 제목 : ${naverSearchItem.title}\n- 내용 : ${naverSearchItem.description}\n`
                 )
                 .join('\n')
 
